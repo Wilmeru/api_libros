@@ -5,13 +5,12 @@ function App(){const[texto,setTexto]=useState("");
     const[anioMinimo,setAnioMinimo]=useState("");
     const[cargando,setCargando]=useState(false);
     const[error,setError]=useState("");
- const buscar=async()=>{if(!texto.trim()){setError("Escribe un libro o autor");return}
-    try{setCargando(true);setError("");
-        const r=await fetch(`https://openlibrary.org/search.json?q=${encodeURIComponent(texto)}&limit=30`);if(!r.ok)throw new Error("No fue posible buscar libros");
-        const d=await r.json();setLibros(d.docs??[])}catch(e){setError(e.message)}finally{setCargando(false)}};
-        
- const procesados=useMemo(()=>{let r=[...libros];if(anioMinimo)r=r.filter(l=>(l.first_publish_year??0)<=Number(anioMinimo));r.sort((a,b)=>(b.first_publish_year??0)-(c.first_publish_year??0));return r},[libros,anioMinimo]);
+ const buscar=async()=>{if(!texto.trim()){setError("Escribe un libro o autor");return}try{setCargando(true);setError("");
+    const r=await fetch(`https://openlibrary.org/search.json?q=${encodeURIComponent(texto)}&limit=30`);if(!r.ok)throw new Error("No fue posible buscar libros");const d=await r.json();setLibros(d.docs??[])}catch(e){setError(e.message)}finally{setCargando(false)}};
+ const procesados=useMemo(()=>{
+    let r=[...libros];if(anioMinimo)r=r.filter(l=>(l.first_publish_year??0)<=Number(anioMinimo));r.sort((a,b)=>(b.first_publish_year??0)-(a.first_publish_year??0));return r},[libros,anioMinimo]);
  const autor=l=>{const a=l.author_name??[];
     return a[0]??a[1]??"Autor desconocido"};
  return <main><h1>Biblioteca digital</h1><input value={texto} placeholder="Ejemplo: Harry Potter" onChange={e=>setTexto(e.target.value)}/><button onClick={buscar} disabled={cargando}>{cargando?"Buscando...":"Buscar"}</button><div style={{marginTop:20}}><label>Mostrar libros publicados desde el año: </label><input type="number" value={anioMinimo} onChange={e=>setAnioMinimo(e.target.value)}/></div><p>Los resultados deberían mostrarse del más reciente al más antiguo.</p>{error&&<p>{error}</p>}{procesados.map((l,i)=><article key={l.key??i}><h2>{l.title}</h2><p>Autor: {autor(l)}</p><p>Primera publicación: {l.first_publish_year??"Sin información"}</p></article>)}</main>;
 } export default App;
+
